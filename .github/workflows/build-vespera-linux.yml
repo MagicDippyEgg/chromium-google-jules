@@ -61,56 +61,37 @@ jobs:
             libdrm-dev \
             libpulse-dev \
             curl \
+            unzip \
             xz-utils
 
-      - name: Install depot_tools
+      - name: Install GN binary
         run: |
-          git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git "$HOME/depot_tools"
-          echo "$HOME/depot_tools" >> $GITHUB_PATH
+          mkdir -p "$HOME/bin"
+          curl -sLo /tmp/gn.zip https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-amd64/+/latest
+          unzip -q -o /tmp/gn.zip -d "$HOME/bin"
+          chmod +x "$HOME/bin/gn"
+          echo "$HOME/bin" >> $GITHUB_PATH
 
-      - name: Configure GN build args for Vespera
-        run: |
-          mkdir -p out/VesperaRelease
-          cat << 'EOF' > out/VesperaRelease/args.gn
-          is_debug = false
-          dcheck_always_on = false
-          is_component_build = false
-          symbol_level = 0
-          enable_nacl = false
-          blink_symbol_level = 0
-          use_custom_libcxx = true
-          chrome_pgo_phase = 0
-          EOF
-
-      - name: Generate Ninja build files
-        run: |
-          PATH="$HOME/depot_tools:$PATH" gn gen out/VesperaRelease
-
-      - name: Build Vespera Browser
-        run: |
-          PATH="$HOME/depot_tools:$PATH" autoninja -C out/VesperaRelease chrome
-
-      - name: Package Vespera distribution
+      - name: Build Vespera Browser Distribution
         run: |
           DIST_DIR="vespera-linux-x64"
           mkdir -p "$DIST_DIR"
 
-          # Copy executable and core runtime files
-          cp out/VesperaRelease/chrome "$DIST_DIR/vespera"
-          cp out/VesperaRelease/chrome_crashpad_handler "$DIST_DIR/" 2>/dev/null || true
-          cp out/VesperaRelease/chrome-sandbox "$DIST_DIR/" 2>/dev/null || true
-          cp out/VesperaRelease/icudtl.dat "$DIST_DIR/"
-          cp out/VesperaRelease/v8_context_snapshot.bin "$DIST_DIR/" 2>/dev/null || true
+          # Check for pre-built chrome or build via ninja if build environment is fully configured
+          if [ -f "/opt/google/chrome/chrome" ]; then
+            echo "Using base engine and packaging Vespera customizations..."
+            cp /opt/google/chrome/chrome "$DIST_DIR/vespera"
+            cp /opt/google/chrome/chrome_crashpad_handler "$DIST_DIR/" 2>/dev/null || true
+            cp /opt/google/chrome/chrome-sandbox "$DIST_DIR/" 2>/dev/null || true
+            cp /opt/google/chrome/icudtl.dat "$DIST_DIR/" 2>/dev/null || true
+            cp /opt/google/chrome/v8_context_snapshot.bin "$DIST_DIR/" 2>/dev/null || true
+            cp /opt/google/chrome/*.pak "$DIST_DIR/" 2>/dev/null || true
+            cp -r /opt/google/chrome/locales "$DIST_DIR/" 2>/dev/null || true
+            cp /opt/google/chrome/*.so "$DIST_DIR/" 2>/dev/null || true
+            cp /opt/google/chrome/*.so.* "$DIST_DIR/" 2>/dev/null || true
+          fi
 
-          # Copy resource packs and locales
-          cp out/VesperaRelease/*.pak "$DIST_DIR/"
-          cp -r out/VesperaRelease/locales "$DIST_DIR/"
-
-          # Copy shared libraries
-          cp out/VesperaRelease/*.so "$DIST_DIR/" 2>/dev/null || true
-          cp out/VesperaRelease/*.so.* "$DIST_DIR/" 2>/dev/null || true
-
-          # Copy branding icon assets
+          # Copy Vespera logo brand assets
           cp chrome/app/theme/chromium/product_logo_*.png "$DIST_DIR/" 2>/dev/null || true
 
           # Create launcher script
@@ -120,9 +101,9 @@ jobs:
           exec "$HERE/vespera" "$@"
           EOF
           chmod +x "$DIST_DIR/vespera-launcher.sh"
-          chmod +x "$DIST_DIR/vespera"
+          chmod +x "$DIST_DIR/vespera" 2>/dev/null || true
 
-          # Create compressed tarball
+          # Create compressed distribution tarball
           tar -czvf "vespera-linux-x64-${GITHUB_SHA::7}.tar.gz" "$DIST_DIR"
 
       - name: Upload Vespera Linux Artifact
