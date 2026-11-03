@@ -2,6 +2,18 @@
 import {SubmitButtonIconType} from '//resources/cr_components/composebox/common.js';
 #html_wrapper_imports_end -->
 <div id="content">
+  <!-- Vespera Celestial Workspace Header -->
+  <div id="vesperaWorkspaceHeader" class="vespera-header">
+    <div class="vespera-brand">
+      <div class="vespera-logo-orb"></div>
+      <span class="vespera-title">Vespera</span>
+      <span class="vespera-badge">Celestial Edition</span>
+    </div>
+    <div class="vespera-actions">
+      <span class="vespera-chip" id="vesperaPrivacyMode">Shield Active</span>
+      <span class="vespera-chip" id="vesperaEngineSelector">Fast Search</span>
+    </div>
+  </div>
   ${this.enableThreadsRail_ ? html`
     <cr-left-hand-side id="lhsWrapper"
         .isDark="${this.theme_?.isDark}"

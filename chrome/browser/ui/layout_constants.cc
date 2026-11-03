@@ -54,7 +54,7 @@ int GetLayoutConstant(LayoutConstant constant) {
     case LayoutConstant::kLocationBarChildInternalSpacing:
       return touch_ui ? 10 : 4;
     case LayoutConstant::kLocationBarChildCornerRadius:
-      return 12;
+      return 16;
     case LayoutConstant::kLocationBarChipIconSize:
       return 16;
     case LayoutConstant::kLocationBarChipPadding:
