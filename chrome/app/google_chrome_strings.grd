@@ -279,10 +279,10 @@ chromium_strings.grd. -->
       </if>
 
       <message name="IDS_PRODUCT_NAME" desc="The Chrome application name" translateable="false">
-        Google Chrome
+        Vespera
       </message>
       <message name="IDS_SHORT_PRODUCT_NAME" desc="The Chrome application short name" translateable="false">
-        Chrome
+        Vespera
       </message>
       <if expr="is_linux or is_macosx or is_win">
         <message name="IDS_SXS_SHORTCUT_NAME" desc="The Chrome shortcut name for canary channel">
@@ -742,11 +742,11 @@ Google Chrome is unable to recover your settings.
         </message>
         <message name="IDS_ELEVATION_SERVICE_DESCRIPTION"
                  desc="The description of the Windows elevation service. Displayed in the Windows Services management console.">
-          Provides encryption services and a secure way for recovering <ph name="BROWSER_NAME">$1<ex>Google Chrome</ex></ph> if it gets out of date. If this service is disabled, <ph name="BROWSER_NAME">$1<ex>Google Chrome</ex></ph> may lose access to encrypted data, and <ph name="BROWSER_NAME">$1<ex>Google Chrome</ex></ph> may not be able recover itself.
+          Provides encryption services and a secure way for recovering <ph name="BROWSER_NAME">$1<ex>Vespera</ex></ph> if it gets out of date. If this service is disabled, <ph name="BROWSER_NAME">$1<ex>Vespera</ex></ph> may lose access to encrypted data, and <ph name="BROWSER_NAME">$1<ex>Vespera</ex></ph> may not be able recover itself.
         </message>
         <message name="IDS_TRACING_SERVICE_DESCRIPTION"
                  desc="The description of the Windows system tracing service. Displayed in the Windows Services management console.">
-          Provides system tracing services for <ph name="BROWSER_NAME">$1<ex>Google Chrome</ex></ph>. If this service is disabled, performance traces created by the browser will not include system-wide events such as context switch and ready thread events.
+          Provides system tracing services for <ph name="BROWSER_NAME">$1<ex>Vespera</ex></ph>. If this service is disabled, performance traces created by the browser will not include system-wide events such as context switch and ready thread events.
         </message>
       </if>
       <if expr="not is_android">
@@ -3097,13 +3097,13 @@ Google Chrome is unable to recover your settings.
           Canceling...
         </message>
         <message name="IDS_TEXT_RESTART_BROWSER" desc="For when a browser must be restarted to complete the installation.">
-          Thanks for installing. You must restart your browser before using <ph name="BUNDLE_NAME">$1<ex>Chrome</ex></ph>.
+          Thanks for installing. You must restart your browser before using <ph name="BUNDLE_NAME">$1<ex>Vespera</ex></ph>.
         </message>
         <message name="IDS_TEXT_RESTART_ALL_BROWSERS" desc="For when all browsers must be restarted to complete the installation.">
-          Thanks for installing. You must restart all your browsers before using <ph name="BUNDLE_NAME">$1<ex>Chrome</ex></ph>.
+          Thanks for installing. You must restart all your browsers before using <ph name="BUNDLE_NAME">$1<ex>Vespera</ex></ph>.
         </message>
         <message name="IDS_TEXT_RESTART_COMPUTER" desc="For when the computer must be restarted to complete the installation.">
-          Thanks for installing. You must restart your computer before using <ph name="BUNDLE_NAME">$1<ex>Chrome</ex></ph>.
+          Thanks for installing. You must restart your computer before using <ph name="BUNDLE_NAME">$1<ex>Vespera</ex></ph>.
         </message>
         <message name="IDS_UPDATER_CLOSE" desc="For close button on the UI post install completion.">
           Close

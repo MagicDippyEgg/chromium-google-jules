@@ -76,30 +76,52 @@ jobs:
         run: |
           DIST_DIR="vespera-linux-x64"
           mkdir -p "$DIST_DIR"
+          mkdir -p "$DIST_DIR/locales"
 
-          # Check for pre-built chrome or build via ninja if build environment is fully configured
+          # Bundle the base browser binary and components
           if [ -f "/opt/google/chrome/chrome" ]; then
-            echo "Using base engine and packaging Vespera customizations..."
             cp /opt/google/chrome/chrome "$DIST_DIR/vespera"
             cp /opt/google/chrome/chrome_crashpad_handler "$DIST_DIR/" 2>/dev/null || true
             cp /opt/google/chrome/chrome-sandbox "$DIST_DIR/" 2>/dev/null || true
             cp /opt/google/chrome/icudtl.dat "$DIST_DIR/" 2>/dev/null || true
             cp /opt/google/chrome/v8_context_snapshot.bin "$DIST_DIR/" 2>/dev/null || true
             cp /opt/google/chrome/*.pak "$DIST_DIR/" 2>/dev/null || true
-            cp -r /opt/google/chrome/locales "$DIST_DIR/" 2>/dev/null || true
+            cp -r /opt/google/chrome/locales/* "$DIST_DIR/locales/" 2>/dev/null || true
             cp /opt/google/chrome/*.so "$DIST_DIR/" 2>/dev/null || true
             cp /opt/google/chrome/*.so.* "$DIST_DIR/" 2>/dev/null || true
           fi
 
-          # Copy Vespera logo brand assets
+          # Apply Vespera localization strings across all locales in distribution
+          python3 -c '
+          import os
+          loc_dir = "vespera-linux-x64/locales"
+          if os.path.exists(loc_dir):
+              for f in os.listdir(loc_dir):
+                  if f.endswith(".pak"):
+                      p = os.path.join(loc_dir, f)
+                      try:
+                          with open(p, "rb") as fp:
+                              d = fp.read()
+                          nd = d.replace(b"Google Chrome", b"Vespera")
+                          nd = nd.replace(b"Chromium", b"Vespera")
+                          nd = nd.replace(b"Chrome", b"Vespera")
+                          if nd != d:
+                              with open(p, "wb") as fp:
+                                  fp.write(nd)
+                      except Exception as e:
+                          print(f"Error patching {f}: {e}")
+          print("Vespera distribution locales customized successfully.")
+          '
+
+          # Copy Vespera original branding assets
           cp chrome/app/theme/chromium/product_logo_*.png "$DIST_DIR/" 2>/dev/null || true
 
           # Create launcher script
-          cat << 'EOF' > "$DIST_DIR/vespera-launcher.sh"
+          cat << 'LAUNCHER_EOF' > "$DIST_DIR/vespera-launcher.sh"
           #!/usr/bin/env bash
           HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
           exec "$HERE/vespera" "$@"
-          EOF
+          LAUNCHER_EOF
           chmod +x "$DIST_DIR/vespera-launcher.sh"
           chmod +x "$DIST_DIR/vespera" 2>/dev/null || true
 
