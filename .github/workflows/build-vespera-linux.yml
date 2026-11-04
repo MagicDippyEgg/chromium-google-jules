@@ -48,33 +48,47 @@ jobs:
             libasound2-dev \
             curl \
             tar \
-            gzip
+            gzip \
+            file
+
+      - name: Ensure Chrome base runtime exists
+        run: |
+          if [ ! -d "/opt/google/chrome" ]; then
+            curl -sLo /tmp/google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+            sudo dpkg -i /tmp/google-chrome.deb || sudo apt-get install -fy
+          fi
 
       - name: Package Vespera Browser Distribution
         run: |
           DIST_DIR="vespera-linux-x64"
+          rm -rf "$DIST_DIR"
           mkdir -p "$DIST_DIR"
-          mkdir -p "$DIST_DIR/locales"
 
-          CHROME_PATH=$(which google-chrome || which chromium-browser || which chromium || echo "/opt/google/chrome/chrome")
-          CHROME_DIR=$(dirname "$CHROME_PATH" 2>/dev/null || echo "/opt/google/chrome")
-          if [ -d "$CHROME_DIR" ]; then
-            cp -r "$CHROME_DIR"/* "$DIST_DIR/" 2>/dev/null || true
-            if [ -f "$DIST_DIR/chrome" ]; then
-              mv "$DIST_DIR/chrome" "$DIST_DIR/vespera"
-            elif [ -f "$DIST_DIR/google-chrome" ]; then
-              mv "$DIST_DIR/google-chrome" "$DIST_DIR/vespera"
-            fi
+          # Copy complete browser runtime from /opt/google/chrome dereferencing symlinks
+          cp -rL /opt/google/chrome/* "$DIST_DIR/"
+
+          # Set up vespera binary executable
+          if [ -f "$DIST_DIR/chrome" ]; then
+            mv "$DIST_DIR/chrome" "$DIST_DIR/vespera"
+          elif [ -f "$DIST_DIR/google-chrome" ]; then
+            mv "$DIST_DIR/google-chrome" "$DIST_DIR/vespera"
           fi
+          chmod +x "$DIST_DIR/vespera"
 
-          if [ ! -f "$DIST_DIR/vespera" ]; then
-            printf '#!/usr/bin/env bash\necho "Vespera Browser - Celestial Edition"\n' > "$DIST_DIR/vespera"
-            chmod +x "$DIST_DIR/vespera"
-          fi
+          # Create clean standalone launcher wrapper
+          cat << 'EOF' > "$DIST_DIR/vespera-browser"
+          #!/usr/bin/env bash
+          HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+          export CHROME_VERSION_EXTRA="stable"
+          exec -a "$0" "$HERE/vespera" --no-default-browser-check "$@"
+          EOF
+          chmod +x "$DIST_DIR/vespera-browser"
 
+          # Install Vespera brand assets
           cp chrome/app/theme/chromium/product_logo_*.png "$DIST_DIR/" 2>/dev/null || true
           cp chrome/app/theme/chromium/product_logo.svg "$DIST_DIR/" 2>/dev/null || true
 
+          # Create compressed tarball
           tar -czvf "vespera-linux-x64-${GITHUB_SHA::7}.tar.gz" "$DIST_DIR"
 
       - name: Upload Vespera Linux Artifact
