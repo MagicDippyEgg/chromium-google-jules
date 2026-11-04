@@ -77,7 +77,7 @@ jobs:
 
       - name: Configure GN for Vespera Release
         run: |
-          export PATH="$HOME/depot_tools:$HOME/bin:$PATH"
+          export PATH="$HOME/bin:$HOME/depot_tools:$PATH"
           mkdir -p out/VesperaRelease
           cat << 'EOF' > out/VesperaRelease/args.gn
           is_debug = false
@@ -93,7 +93,7 @@ jobs:
 
       - name: Compile Vespera Browser with Ninja
         run: |
-          export PATH="$HOME/depot_tools:$HOME/bin:$PATH"
+          export PATH="$HOME/bin:$HOME/depot_tools:$PATH"
           ninja -C out/VesperaRelease chrome
 
       - name: Package Vespera Distribution
