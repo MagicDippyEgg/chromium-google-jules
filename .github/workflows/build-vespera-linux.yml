@@ -61,59 +61,58 @@ jobs:
             libdrm-dev \
             libpulse-dev \
             curl \
+            git \
             unzip \
             xz-utils
 
-      - name: Install GN binary
+      - name: Install depot_tools and GN
         run: |
+          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git "$HOME/depot_tools"
+          echo "$HOME/depot_tools" >> $GITHUB_PATH
           mkdir -p "$HOME/bin"
           curl -sLo /tmp/gn.zip https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-amd64/+/latest
           unzip -q -o /tmp/gn.zip -d "$HOME/bin"
           chmod +x "$HOME/bin/gn"
           echo "$HOME/bin" >> $GITHUB_PATH
 
-      - name: Build Vespera Browser Distribution
+      - name: Configure GN for Vespera Release
+        run: |
+          export PATH="$HOME/depot_tools:$HOME/bin:$PATH"
+          mkdir -p out/VesperaRelease
+          cat << 'EOF' > out/VesperaRelease/args.gn
+          is_debug = false
+          dcheck_always_on = false
+          symbol_level = 0
+          blink_symbol_level = 0
+          target_cpu = "x64"
+          is_component_build = false
+          use_custom_libcxx = true
+          treat_warnings_as_errors = false
+          EOF
+          gn gen out/VesperaRelease
+
+      - name: Compile Vespera Browser with Ninja
+        run: |
+          export PATH="$HOME/depot_tools:$HOME/bin:$PATH"
+          ninja -C out/VesperaRelease chrome
+
+      - name: Package Vespera Distribution
         run: |
           DIST_DIR="vespera-linux-x64"
           mkdir -p "$DIST_DIR"
-          mkdir -p "$DIST_DIR/locales"
 
-          # Bundle the base browser binary and components
-          if [ -f "/opt/google/chrome/chrome" ]; then
-            cp /opt/google/chrome/chrome "$DIST_DIR/vespera"
-            cp /opt/google/chrome/chrome_crashpad_handler "$DIST_DIR/" 2>/dev/null || true
-            cp /opt/google/chrome/chrome-sandbox "$DIST_DIR/" 2>/dev/null || true
-            cp /opt/google/chrome/icudtl.dat "$DIST_DIR/" 2>/dev/null || true
-            cp /opt/google/chrome/v8_context_snapshot.bin "$DIST_DIR/" 2>/dev/null || true
-            cp /opt/google/chrome/*.pak "$DIST_DIR/" 2>/dev/null || true
-            cp -r /opt/google/chrome/locales/* "$DIST_DIR/locales/" 2>/dev/null || true
-            cp /opt/google/chrome/*.so "$DIST_DIR/" 2>/dev/null || true
-            cp /opt/google/chrome/*.so.* "$DIST_DIR/" 2>/dev/null || true
-          fi
+          # Copy compiled output artifacts
+          cp out/VesperaRelease/chrome "$DIST_DIR/vespera"
+          cp out/VesperaRelease/chrome_crashpad_handler "$DIST_DIR/" 2>/dev/null || true
+          cp out/VesperaRelease/chrome-sandbox "$DIST_DIR/" 2>/dev/null || true
+          cp out/VesperaRelease/icudtl.dat "$DIST_DIR/" 2>/dev/null || true
+          cp out/VesperaRelease/v8_context_snapshot.bin "$DIST_DIR/" 2>/dev/null || true
+          cp out/VesperaRelease/*.pak "$DIST_DIR/" 2>/dev/null || true
+          cp -r out/VesperaRelease/locales "$DIST_DIR/" 2>/dev/null || true
+          cp out/VesperaRelease/*.so "$DIST_DIR/" 2>/dev/null || true
+          cp out/VesperaRelease/*.so.* "$DIST_DIR/" 2>/dev/null || true
 
-          # Apply Vespera localization strings across all locales in distribution
-          python3 -c '
-          import os
-          loc_dir = "vespera-linux-x64/locales"
-          if os.path.exists(loc_dir):
-              for f in os.listdir(loc_dir):
-                  if f.endswith(".pak"):
-                      p = os.path.join(loc_dir, f)
-                      try:
-                          with open(p, "rb") as fp:
-                              d = fp.read()
-                          nd = d.replace(b"Google Chrome", b"Vespera")
-                          nd = nd.replace(b"Chromium", b"Vespera")
-                          nd = nd.replace(b"Chrome", b"Vespera")
-                          if nd != d:
-                              with open(p, "wb") as fp:
-                                  fp.write(nd)
-                      except Exception as e:
-                          print(f"Error patching {f}: {e}")
-          print("Vespera distribution locales customized successfully.")
-          '
-
-          # Copy Vespera original branding assets
+          # Include branding assets
           cp chrome/app/theme/chromium/product_logo_*.png "$DIST_DIR/" 2>/dev/null || true
 
           # Create launcher script
@@ -123,7 +122,7 @@ jobs:
           exec "$HERE/vespera" "$@"
           LAUNCHER_EOF
           chmod +x "$DIST_DIR/vespera-launcher.sh"
-          chmod +x "$DIST_DIR/vespera" 2>/dev/null || true
+          chmod +x "$DIST_DIR/vespera"
 
           # Create compressed distribution tarball
           tar -czvf "vespera-linux-x64-${GITHUB_SHA::7}.tar.gz" "$DIST_DIR"

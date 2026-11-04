@@ -23,13 +23,10 @@ void AddMaterialOmniboxColorMixer(ui::ColorProvider* provider,
   // required to do so according to the new material spec.
   // TODO(crbug.com/40883435): Update color recipes to match UX mocks.
   ui::ColorMixer& mixer = provider->AddMixer();
-  mixer[kColorLocationBarClearAllButtonIcon] = {ui::kColorSysOnSurfaceSubtle};
-  mixer[kColorLocationBarClearAllButtonIconDisabled] =
-      ui::GetResultingPaintColor(ui::kColorSysStateDisabled,
-                                 kColorLocationBarClearAllButtonIcon);
+  mixer[kColorLocationBarClearAllButtonIcon] = {SkColorSetRGB(0x89, 0x57, 0xe5)};
+  mixer[kColorLocationBarClearAllButtonIconDisabled] = {SkColorSetARGB(0x60, 0x89, 0x57, 0xe5)};
   mixer[kColorToolbarBackgroundSubtleEmphasis] = {
-      ui::kColorSysOmniboxContainer};
-  mixer[kColorToolbarBackgroundSubtleEmphasisHovered] =
-      ui::GetResultingPaintColor(ui::kColorSysStateHoverBrightBlendProtection,
-                                 kColorToolbarBackgroundSubtleEmphasis);
+      SkColorSetRGB(0x13, 0x19, 0x24)};
+  mixer[kColorToolbarBackgroundSubtleEmphasisHovered] = {
+      SkColorSetRGB(0x1c, 0x24, 0x33)};
 }

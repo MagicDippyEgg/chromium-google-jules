@@ -2,24 +2,25 @@
 import {SubmitButtonIconType} from '//resources/cr_components/composebox/common.js';
 #html_wrapper_imports_end -->
 <div id="content">
-  <!-- Vespera Celestial Workspace Header -->
-  <div id="vesperaWorkspaceHeader" class="vespera-header">
-    <div class="vespera-brand">
-      <div class="vespera-logo-orb"></div>
-      <span class="vespera-title">Vespera</span>
-      <span class="vespera-badge">Celestial Edition</span>
-    </div>
-    <div class="vespera-actions">
-      <span class="vespera-chip" id="vesperaPrivacyMode">Shield Active</span>
-      <span class="vespera-chip" id="vesperaEngineSelector">Fast Search</span>
-    </div>
-  </div>
   ${this.enableThreadsRail_ ? html`
     <cr-left-hand-side id="lhsWrapper"
         .isDark="${this.theme_?.isDark}"
         @open-composebox="${this.onOpenComposebox_}">
     </cr-left-hand-side>` : ''}
   <div id="rhsWrapper">
+    <div class="vespera-header">
+      <div class="vespera-brand">
+        <div class="vespera-logo-orb"></div>
+        <div class="vespera-title">VESPERA</div>
+        <span class="vespera-badge">Celestial Edition</span>
+      </div>
+      <div class="vespera-actions">
+        <a class="vespera-chip" href="chrome://settings">Settings</a>
+        <a class="vespera-chip" href="chrome://history">History</a>
+        <a class="vespera-chip" href="chrome://bookmarks">Bookmarks</a>
+        <a class="vespera-chip" href="chrome://downloads">Downloads</a>
+      </div>
+    </div>
     <div id="rhsContent" @scroll="${this.onRhsContentScroll_}">
       ${this.lazyRender_ && this.microsoftModuleEnabled_ ? html`
         <iframe id="microsoftAuth" src="${this.microsoftAuthIframePath_}"></iframe>

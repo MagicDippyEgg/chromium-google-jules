@@ -575,7 +575,7 @@ ntp-lens-upload-dialog {
 }
 
 :host(:not([show-background-image_])) #rhsContent {
-  background: radial-gradient(circle at 50% 20%, #161b26 0%, #0d1117 100%);
+  background: radial-gradient(circle at 50% 20%, #161b26 0%, #0c1017 100%);
 }
 
 .vespera-header {
@@ -600,8 +600,8 @@ ntp-lens-upload-dialog {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #8a2be2 0%, #00d2ff 100%);
-  box-shadow: 0 0 16px rgba(0, 210, 255, 0.45);
+  background: linear-gradient(135deg, #7c4dff 0%, #00e5ff 100%);
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.45);
 }
 
 .vespera-title {
@@ -617,9 +617,9 @@ ntp-lens-upload-dialog {
   font-weight: 600;
   padding: 3px 8px;
   border-radius: 12px;
-  background: rgba(137, 87, 229, 0.22);
+  background: rgba(124, 77, 255, 0.22);
   color: #bc8cff;
-  border: 1px solid rgba(137, 87, 229, 0.45);
+  border: 1px solid rgba(124, 77, 255, 0.45);
   text-transform: uppercase;
   letter-spacing: 0.75px;
 }
@@ -639,12 +639,13 @@ ntp-lens-upload-dialog {
   padding: 6px 14px;
   border-radius: 20px;
   backdrop-filter: blur(8px);
+  text-decoration: none;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .vespera-chip:hover {
-  color: #58a6ff;
-  border-color: #58a6ff;
-  box-shadow: 0 0 10px rgba(88, 166, 255, 0.2);
+  color: #00e5ff;
+  border-color: #00e5ff;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
 }
