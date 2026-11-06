@@ -59,21 +59,19 @@ void ApplyChromeSettingsRefresh2026ColorOverrides(ui::ColorMixer& mixer) {
     return;
   }
 
-  // Settings page colors.
-  mixer[kColorSettingsWebuiPageBackground] = {ui::kColorSysSurface2};
-  mixer[kColorSettingsTitleText] = {ui::kColorSysOnSurface};
-  mixer[kColorSettingsSectionBackground] = {ui::kColorSysBase};
-  mixer[kColorSettingsRowBackgroundHovered] = {ui::GetResultingPaintColor(
-      ui::kColorSysStateHover, kColorSettingsSectionBackground)};
-  mixer[kColorSettingsRowBackgroundActive] = {ui::GetResultingPaintColor(
-      ui::kColorSysStatePressed, kColorSettingsSectionBackground)};
-  mixer[kColorSettingsNavMenuItemBackground] = {ui::kColorSysTonalContainer};
-  mixer[kColorSettingsNavMenuItemForeground] = {ui::kColorSysOnSurface};
+  // Vespera twilight cosmic color palette overrides
+  mixer[kColorSettingsWebuiPageBackground] = {SkColorSetRGB(0x0a, 0x0e, 0x17)};
+  mixer[kColorSettingsTitleText] = {SkColorSetRGB(0xf0, 0xf6, 0xfc)};
+  mixer[kColorSettingsSectionBackground] = {SkColorSetRGB(0x13, 0x19, 0x24)};
+  mixer[kColorSettingsRowBackgroundHovered] = {SkColorSetRGB(0x1c, 0x24, 0x33)};
+  mixer[kColorSettingsRowBackgroundActive] = {SkColorSetRGB(0x23, 0x2e, 0x40)};
+  mixer[kColorSettingsNavMenuItemBackground] = {SkColorSetRGB(0x18, 0x20, 0x2e)};
+  mixer[kColorSettingsNavMenuItemForeground] = {SkColorSetRGB(0x58, 0xa6, 0xff)};
   mixer[kColorSettingsNavMenuItemForegroundSelected] = {
-      ui::kColorSysOnTonalContainer};
-  mixer[kColorSettingsNavMenuItemIcon] = {ui::kColorSysOnSurfaceSubtle};
-  mixer[kColorToolbarSearchFieldTextColor] = {ui::kColorSysOnSurfaceSubtle};
-  mixer[kColorSettingsColumnedSectionBackground] = {ui::kColorSysBaseContainer};
+      SkColorSetRGB(0xbc, 0x8c, 0xff)};
+  mixer[kColorSettingsNavMenuItemIcon] = {SkColorSetRGB(0x89, 0x57, 0xe5)};
+  mixer[kColorToolbarSearchFieldTextColor] = {SkColorSetRGB(0xc9, 0xd1, 0xd9)};
+  mixer[kColorSettingsColumnedSectionBackground] = {SkColorSetRGB(0x13, 0x19, 0x24)};
 }
 
 }  // namespace

@@ -76,18 +76,18 @@ void AddMaterialTabStripColorMixer(ui::ColorProvider* provider,
                               {kColorTabBackgroundInactiveFrameInactive});
 
   // TabDivider colors.
-  mixer[kColorTabDividerFrameActive] = {ui::kColorSysOnHeaderDivider};
-  mixer[kColorTabDividerFrameInactive] = {ui::kColorSysOnHeaderDividerInactive};
+  mixer[kColorTabDividerFrameActive] = {SkColorSetRGB(0x23, 0x2e, 0x40)};
+  mixer[kColorTabDividerFrameInactive] = {SkColorSetRGB(0x18, 0x22, 0x34)};
 
   // Tabstrip Control Button colors.
   mixer[kColorNewTabButtonCRForegroundFrameActive] = {
-      ui::kColorSysOnSurfaceSubtle};
+      SkColorSetRGB(0x00, 0xe5, 0xff)};
   mixer[kColorNewTabButtonCRForegroundFrameInactive] = {
-      ui::kColorSysOnSurfaceSubtle};
+      SkColorSetRGB(0x89, 0x57, 0xe5)};
   mixer[kColorNewTabButtonCRBackgroundFrameActive] = {
-      ui::kColorSysHeaderContainer};
+      SkColorSetRGB(0x18, 0x22, 0x34)};
   mixer[kColorNewTabButtonCRBackgroundFrameInactive] = {
-      ui::kColorSysHeaderContainerInactive};
+      SkColorSetRGB(0x0c, 0x10, 0x17)};
 
   mixer[kColorTabSearchButtonCRForegroundFrameActive] = {
       ui::kColorSysOnSurfacePrimary};

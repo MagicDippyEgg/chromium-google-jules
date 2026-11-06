@@ -575,5 +575,77 @@ ntp-lens-upload-dialog {
 }
 
 :host(:not([show-background-image_])) #rhsContent {
-  background-color: var(--color-new-tab-page-background);
+  background: radial-gradient(circle at 50% 20%, #161b26 0%, #0c1017 100%);
+}
+
+.vespera-header {
+  position: absolute;
+  top: 18px;
+  left: 28px;
+  right: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.vespera-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vespera-logo-orb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c4dff 0%, #00e5ff 100%);
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.45);
+}
+
+.vespera-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #f0f6fc;
+}
+
+.vespera-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: rgba(124, 77, 255, 0.22);
+  color: #bc8cff;
+  border: 1px solid rgba(124, 77, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.75px;
+}
+
+.vespera-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vespera-chip {
+  font-size: 12px;
+  font-weight: 500;
+  color: #8b949e;
+  background: rgba(22, 27, 34, 0.85);
+  border: 1px solid rgba(48, 54, 61, 0.9);
+  padding: 6px 14px;
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vespera-chip:hover {
+  color: #00e5ff;
+  border-color: #00e5ff;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
 }

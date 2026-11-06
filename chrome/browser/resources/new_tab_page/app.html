@@ -8,6 +8,19 @@ import {SubmitButtonIconType} from '//resources/cr_components/composebox/common.
         @open-composebox="${this.onOpenComposebox_}">
     </cr-left-hand-side>` : ''}
   <div id="rhsWrapper">
+    <div class="vespera-header">
+      <div class="vespera-brand">
+        <div class="vespera-logo-orb"></div>
+        <div class="vespera-title">VESPERA</div>
+        <span class="vespera-badge">Celestial Edition</span>
+      </div>
+      <div class="vespera-actions">
+        <a class="vespera-chip" href="chrome://settings">Settings</a>
+        <a class="vespera-chip" href="chrome://history">History</a>
+        <a class="vespera-chip" href="chrome://bookmarks">Bookmarks</a>
+        <a class="vespera-chip" href="chrome://downloads">Downloads</a>
+      </div>
+    </div>
     <div id="rhsContent" @scroll="${this.onRhsContentScroll_}">
       ${this.lazyRender_ && this.microsoftModuleEnabled_ ? html`
         <iframe id="microsoftAuth" src="${this.microsoftAuthIframePath_}"></iframe>

@@ -12,11 +12,13 @@
  * #css_wrapper_metadata_end */
 
 :host {
-  color: var(--cr-primary-text-color);
+  background: radial-gradient(circle at 50% 0%, #131924 0%, #0c1017 100%) !important;
+  color: #f0f6fc;
   display: flex;
   flex-direction: column;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   height: 100%;
-  line-height: 1.54;  /* 20px. */
+  line-height: 1.54;
 }
 
 #main-container {
