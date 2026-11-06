@@ -84,6 +84,9 @@ jobs:
           EOF
           chmod +x "$DIST_DIR/vespera-browser"
 
+          # Apply full Vespera branding, localization, and PAK transformations
+          python3 tools/vespera/apply_transform.py "$DIST_DIR"
+
           # Install Vespera brand assets
           cp chrome/app/theme/chromium/product_logo_*.png "$DIST_DIR/" 2>/dev/null || true
           cp chrome/app/theme/chromium/product_logo.svg "$DIST_DIR/" 2>/dev/null || true
