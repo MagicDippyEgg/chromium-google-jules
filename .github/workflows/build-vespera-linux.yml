@@ -1,103 +1,47 @@
-name: Build Vespera for Linux
+name: Build Vespera Linux
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main, master ]
   pull_request:
-    branches:
-      - main
+    branches: [ main, master ]
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
-  build-linux:
-    name: Build Vespera Browser (Linux x86_64)
-    runs-on: ubuntu-24.04
-
+  build-vespera:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
     steps:
-      - name: Checkout repository
+      - name: Checkout Vespera Source
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 1
 
-      - name: Free up disk space
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf "/usr/local/share/boost"
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          df -h
-
-      - name: Set up build tools and dependencies
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            brotli \
-            generate-ninja \
-            ninja-build \
-            python3 \
-            python3-pip \
-            python3-setuptools \
-            libglib2.0-dev \
-            libgtk-3-dev \
-            libnss3-dev \
-            libasound2-dev \
-            curl \
-            tar \
-            gzip \
-            file
+            build-essential clang lld ninja-build python3 python3-pkg-resources \
+            bison gperf pkg-config libglib2.0-dev libnss3-dev libatk1.0-dev \
+            libatk-bridge2.0-dev libcups2-dev libdrm-dev libxkbcommon-dev \
+            libxcomposite-dev libxdamage-dev libxrandr-dev libgbm-dev \
+            libasound2-dev libpango1.0-dev libpulse-dev
 
-      - name: Ensure Chrome base runtime exists
+      - name: Generate Build Configuration (GN)
         run: |
-          if [ ! -d "/opt/google/chrome" ]; then
-            curl -sLo /tmp/google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-            sudo dpkg -i /tmp/google-chrome.deb || sudo apt-get install -fy
-          fi
+          gn gen out/Release --args="is_debug=false is_component_build=false symbol_level=0 blink_symbol_level=0 enable_nacl=false use_custom_libcxx=false"
 
-      - name: Package Vespera Browser Distribution
+      - name: Compile Vespera Browser (Ninja)
         run: |
-          DIST_DIR="vespera-linux-x64"
-          rm -rf "$DIST_DIR"
-          mkdir -p "$DIST_DIR"
+          ninja -C out/Release chrome
 
-          # Copy complete browser runtime from /opt/google/chrome dereferencing symlinks
-          cp -rL /opt/google/chrome/* "$DIST_DIR/"
+      - name: Package Vespera Browser
+        run: |
+          mkdir -p package/vespera
+          cp -r out/Release/chrome out/Release/*.pak out/Release/*.bin out/Release/locales out/Release/resources package/vespera/ || true
+          tar -czvf vespera-linux-x64.tar.gz -C package vespera
 
-          # Set up vespera binary executable
-          if [ -f "$DIST_DIR/chrome" ]; then
-            mv "$DIST_DIR/chrome" "$DIST_DIR/vespera"
-          elif [ -f "$DIST_DIR/google-chrome" ]; then
-            mv "$DIST_DIR/google-chrome" "$DIST_DIR/vespera"
-          fi
-          chmod +x "$DIST_DIR/vespera"
-
-          # Create clean standalone launcher wrapper
-          cat << 'EOF' > "$DIST_DIR/vespera-browser"
-          #!/usr/bin/env bash
-          HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-          export CHROME_VERSION_EXTRA="stable"
-          exec -a "$0" "$HERE/vespera" --no-default-browser-check "$@"
-          EOF
-          chmod +x "$DIST_DIR/vespera-browser"
-
-          # Apply full Vespera branding, localization, and PAK transformations
-          python3 tools/vespera/apply_transform.py "$DIST_DIR"
-
-          # Install Vespera brand assets
-          cp chrome/app/theme/chromium/product_logo_*.png "$DIST_DIR/" 2>/dev/null || true
-          cp chrome/app/theme/chromium/product_logo.svg "$DIST_DIR/" 2>/dev/null || true
-
-          # Create compressed tarball
-          tar -czvf "vespera-linux-x64-${GITHUB_SHA::7}.tar.gz" "$DIST_DIR"
-
-      - name: Upload Vespera Linux Artifact
+      - name: Upload Vespera Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: vespera-linux-x64-${{ github.sha }}
-          path: vespera-linux-x64-*.tar.gz
+          name: vespera-linux-x64
+          path: vespera-linux-x64.tar.gz
           retention-days: 14
-          if-no-files-found: error

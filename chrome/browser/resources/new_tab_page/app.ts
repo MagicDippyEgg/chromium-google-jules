@@ -694,9 +694,113 @@ export class AppElement extends AppElementBase {
     if (this.composeButtonEnabled) {
       recordBoolean('NewTabPage.ComposeEntrypoint.Shown', true);
       this.pageHandler_.incrementComposeButtonShownCount();
-    }
+    };
 
     this.initializeContextMenuAnimationState_();
+    this.setupVesperaPortalInteractions_();
+  }
+
+  private setupVesperaPortalInteractions_() {
+    // Mode tabs switching
+    const modeTabs = this.shadowRoot?.querySelectorAll('.vespera-mode-tab');
+    modeTabs?.forEach(tab => {
+      tab.addEventListener('click', () => {
+        modeTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const mode = tab.getAttribute('data-mode');
+        this.applyVesperaMode_(mode || 'focus');
+      });
+    });
+
+    // Engine chips switching
+    const engineChips = this.shadowRoot?.querySelectorAll('.engine-hud-chip');
+    engineChips?.forEach(chip => {
+      chip.addEventListener('click', () => {
+        engineChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+      });
+    });
+
+    // Zen mode toggle
+    const zenBtn = this.shadowRoot?.querySelector('#vesperaZenBtn');
+    if (zenBtn) {
+      let zenActive = false;
+      zenBtn.addEventListener('click', () => {
+        zenActive = !zenActive;
+        const label = zenBtn.querySelector('.vespera-zen-label');
+        const dot = zenBtn.querySelector('.vespera-zen-dot') as HTMLElement;
+        if (label) {
+          label.textContent = zenActive ? 'Zen: Active' : 'Zen: Off';
+        }
+        if (dot) {
+          dot.style.background = zenActive ? '#00e5ff' : '#484f58';
+          dot.style.boxShadow = zenActive ? '0 0 8px #00e5ff' : 'none';
+        }
+      });
+    }
+  }
+
+  private applyVesperaMode_(mode: string) {
+    const constellationGrid = this.shadowRoot?.querySelector('.constellation-grid');
+    if (!constellationGrid) return;
+    if (mode === 'research') {
+      constellationGrid.innerHTML = `
+        <a class="constellation-card" href="https://arxiv.org" target="_blank">
+          <span class="card-star">✶</span>
+          <div class="card-info"><span class="card-name">arXiv</span><span class="card-desc">AI &amp; CS Preprints</span></div>
+        </a>
+        <a class="constellation-card" href="https://scholar.google.com" target="_blank">
+          <span class="card-star">✧</span>
+          <div class="card-info"><span class="card-name">Google Scholar</span><span class="card-desc">Academic Papers</span></div>
+        </a>
+        <a class="constellation-card" href="https://en.wikipedia.org" target="_blank">
+          <span class="card-star">✪</span>
+          <div class="card-info"><span class="card-name">Wikipedia</span><span class="card-desc">Encyclopedia</span></div>
+        </a>
+        <a class="constellation-card" href="https://github.com" target="_blank">
+          <span class="card-star">✦</span>
+          <div class="card-info"><span class="card-name">GitHub</span><span class="card-desc">Open Source</span></div>
+        </a>
+      `;
+    } else if (mode === 'creative') {
+      constellationGrid.innerHTML = `
+        <a class="constellation-card" href="https://dribbble.com" target="_blank">
+          <span class="card-star">✦</span>
+          <div class="card-info"><span class="card-name">Dribbble</span><span class="card-desc">Visual Inspiration</span></div>
+        </a>
+        <a class="constellation-card" href="https://unsplash.com" target="_blank">
+          <span class="card-star">✧</span>
+          <div class="card-info"><span class="card-name">Unsplash</span><span class="card-desc">High-Res Imagery</span></div>
+        </a>
+        <a class="constellation-card" href="https://codepen.io" target="_blank">
+          <span class="card-star">✶</span>
+          <div class="card-info"><span class="card-name">CodePen</span><span class="card-desc">Creative Coding</span></div>
+        </a>
+        <a class="constellation-card" href="https://figma.com" target="_blank">
+          <span class="card-star">✪</span>
+          <div class="card-info"><span class="card-name">Figma</span><span class="card-desc">Interface Design</span></div>
+        </a>
+      `;
+    } else {
+      constellationGrid.innerHTML = `
+        <a class="constellation-card" href="https://news.ycombinator.com" target="_blank">
+          <span class="card-star">✦</span>
+          <div class="card-info"><span class="card-name">Hacker News</span><span class="card-desc">Tech &amp; Engineering</span></div>
+        </a>
+        <a class="constellation-card" href="https://github.com" target="_blank">
+          <span class="card-star">✧</span>
+          <div class="card-info"><span class="card-name">GitHub</span><span class="card-desc">Code &amp; Repositories</span></div>
+        </a>
+        <a class="constellation-card" href="https://arxiv.org" target="_blank">
+          <span class="card-star">✶</span>
+          <div class="card-info"><span class="card-name">arXiv</span><span class="card-desc">Scientific Preprints</span></div>
+        </a>
+        <a class="constellation-card" href="https://en.wikipedia.org" target="_blank">
+          <span class="card-star">✪</span>
+          <div class="card-info"><span class="card-name">Wikipedia</span><span class="card-desc">Universal Knowledge</span></div>
+        </a>
+      `;
+    }
   }
 
   override disconnectedCallback() {
