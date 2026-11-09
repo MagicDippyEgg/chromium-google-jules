@@ -694,14 +694,15 @@ export class AppElement extends AppElementBase {
     if (this.composeButtonEnabled) {
       recordBoolean('NewTabPage.ComposeEntrypoint.Shown', true);
       this.pageHandler_.incrementComposeButtonShownCount();
-    };
+    }
 
     this.initializeContextMenuAnimationState_();
     this.setupVesperaPortalInteractions_();
   }
 
+  private selectedEngineUrl_: string = 'https://duckduckgo.com/?q=';
+
   private setupVesperaPortalInteractions_() {
-    // Mode tabs switching
     const modeTabs = this.shadowRoot?.querySelectorAll('.vespera-mode-tab');
     modeTabs?.forEach(tab => {
       tab.addEventListener('click', () => {
@@ -712,16 +713,39 @@ export class AppElement extends AppElementBase {
       });
     });
 
-    // Engine chips switching
     const engineChips = this.shadowRoot?.querySelectorAll('.engine-hud-chip');
+    const engineMap: Record<string, string> = {
+      'duckduckgo': 'https://duckduckgo.com/?q=',
+      'ecosia': 'https://www.ecosia.org/search?q=',
+      'google': 'https://www.google.com/search?q=',
+      'perplexity': 'https://www.perplexity.ai/search?q='
+    };
     engineChips?.forEach(chip => {
       chip.addEventListener('click', () => {
         engineChips.forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
+        const engine = chip.getAttribute('data-engine') || 'duckduckgo';
+        if (engineMap[engine]) {
+          this.selectedEngineUrl_ = engineMap[engine];
+        }
       });
     });
 
-    // Zen mode toggle
+    const realbox = this.shadowRoot?.querySelector('ntp-realbox');
+    if (realbox) {
+      realbox.addEventListener('keydown', (e: Event) => {
+        const keyEvent = e as KeyboardEvent;
+        if (keyEvent.key === 'Enter') {
+          const input = realbox.shadowRoot?.querySelector('input');
+          if (input && input.value.trim() && !this.selectedEngineUrl_.includes('google.com')) {
+            keyEvent.preventDefault();
+            keyEvent.stopPropagation();
+            window.location.href = this.selectedEngineUrl_ + encodeURIComponent(input.value.trim());
+          }
+        }
+      }, true);
+    }
+
     const zenBtn = this.shadowRoot?.querySelector('#vesperaZenBtn');
     if (zenBtn) {
       let zenActive = false;
@@ -736,6 +760,18 @@ export class AppElement extends AppElementBase {
           dot.style.background = zenActive ? '#00e5ff' : '#484f58';
           dot.style.boxShadow = zenActive ? '0 0 8px #00e5ff' : 'none';
         }
+        const portal = this.shadowRoot?.querySelector('.vespera-portal-container') as HTMLElement;
+        const rhsContent = this.shadowRoot?.querySelector('#rhsContent') as HTMLElement;
+        if (portal) {
+          portal.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+          portal.style.opacity = zenActive ? '0.1' : '1';
+        }
+        if (rhsContent) {
+          const modules = rhsContent.querySelectorAll('ntp-modules, #customizeButton, #microsoftAuth');
+          modules.forEach((mod) => {
+            (mod as HTMLElement).style.display = zenActive ? 'none' : '';
+          });
+        }
       });
     }
   }
@@ -743,64 +779,69 @@ export class AppElement extends AppElementBase {
   private applyVesperaMode_(mode: string) {
     const constellationGrid = this.shadowRoot?.querySelector('.constellation-grid');
     if (!constellationGrid) return;
-    if (mode === 'research') {
-      constellationGrid.innerHTML = `
-        <a class="constellation-card" href="https://arxiv.org" target="_blank">
-          <span class="card-star">✶</span>
-          <div class="card-info"><span class="card-name">arXiv</span><span class="card-desc">AI &amp; CS Preprints</span></div>
-        </a>
-        <a class="constellation-card" href="https://scholar.google.com" target="_blank">
-          <span class="card-star">✧</span>
-          <div class="card-info"><span class="card-name">Google Scholar</span><span class="card-desc">Academic Papers</span></div>
-        </a>
-        <a class="constellation-card" href="https://en.wikipedia.org" target="_blank">
-          <span class="card-star">✪</span>
-          <div class="card-info"><span class="card-name">Wikipedia</span><span class="card-desc">Encyclopedia</span></div>
-        </a>
-        <a class="constellation-card" href="https://github.com" target="_blank">
-          <span class="card-star">✦</span>
-          <div class="card-info"><span class="card-name">GitHub</span><span class="card-desc">Open Source</span></div>
-        </a>
-      `;
-    } else if (mode === 'creative') {
-      constellationGrid.innerHTML = `
-        <a class="constellation-card" href="https://dribbble.com" target="_blank">
-          <span class="card-star">✦</span>
-          <div class="card-info"><span class="card-name">Dribbble</span><span class="card-desc">Visual Inspiration</span></div>
-        </a>
-        <a class="constellation-card" href="https://unsplash.com" target="_blank">
-          <span class="card-star">✧</span>
-          <div class="card-info"><span class="card-name">Unsplash</span><span class="card-desc">High-Res Imagery</span></div>
-        </a>
-        <a class="constellation-card" href="https://codepen.io" target="_blank">
-          <span class="card-star">✶</span>
-          <div class="card-info"><span class="card-name">CodePen</span><span class="card-desc">Creative Coding</span></div>
-        </a>
-        <a class="constellation-card" href="https://figma.com" target="_blank">
-          <span class="card-star">✪</span>
-          <div class="card-info"><span class="card-name">Figma</span><span class="card-desc">Interface Design</span></div>
-        </a>
-      `;
-    } else {
-      constellationGrid.innerHTML = `
-        <a class="constellation-card" href="https://news.ycombinator.com" target="_blank">
-          <span class="card-star">✦</span>
-          <div class="card-info"><span class="card-name">Hacker News</span><span class="card-desc">Tech &amp; Engineering</span></div>
-        </a>
-        <a class="constellation-card" href="https://github.com" target="_blank">
-          <span class="card-star">✧</span>
-          <div class="card-info"><span class="card-name">GitHub</span><span class="card-desc">Code &amp; Repositories</span></div>
-        </a>
-        <a class="constellation-card" href="https://arxiv.org" target="_blank">
-          <span class="card-star">✶</span>
-          <div class="card-info"><span class="card-name">arXiv</span><span class="card-desc">Scientific Preprints</span></div>
-        </a>
-        <a class="constellation-card" href="https://en.wikipedia.org" target="_blank">
-          <span class="card-star">✪</span>
-          <div class="card-info"><span class="card-name">Wikipedia</span><span class="card-desc">Universal Knowledge</span></div>
-        </a>
-      `;
+
+    interface LinkItem {
+      star: string;
+      name: string;
+      desc: string;
+      url: string;
     }
+
+    let items: LinkItem[] = [];
+    if (mode === 'research') {
+      items = [
+        {star: '✶', name: 'arXiv', desc: 'AI & CS Preprints', url: 'https://arxiv.org'},
+        {star: '✧', name: 'Google Scholar', desc: 'Academic Papers', url: 'https://scholar.google.com'},
+        {star: '✪', name: 'Wikipedia', desc: 'Encyclopedia', url: 'https://en.wikipedia.org'},
+        {star: '✦', name: 'GitHub', desc: 'Open Source', url: 'https://github.com'}
+      ];
+    } else if (mode === 'creative') {
+      items = [
+        {star: '✦', name: 'Dribbble', desc: 'Visual Inspiration', url: 'https://dribbble.com'},
+        {star: '✧', name: 'Unsplash', desc: 'High-Res Imagery', url: 'https://unsplash.com'},
+        {star: '✶', name: 'CodePen', desc: 'Creative Coding', url: 'https://codepen.io'},
+        {star: '✪', name: 'Figma', desc: 'Interface Design', url: 'https://figma.com'}
+      ];
+    } else {
+      items = [
+        {star: '✦', name: 'Hacker News', desc: 'Tech & Engineering', url: 'https://news.ycombinator.com'},
+        {star: '✧', name: 'GitHub', desc: 'Code & Repositories', url: 'https://github.com'},
+        {star: '✶', name: 'arXiv', desc: 'Scientific Preprints', url: 'https://arxiv.org'},
+        {star: '✪', name: 'Wikipedia', desc: 'Universal Knowledge', url: 'https://en.wikipedia.org'}
+      ];
+    }
+
+    while (constellationGrid.firstChild) {
+      constellationGrid.removeChild(constellationGrid.firstChild);
+    }
+
+    items.forEach(item => {
+      const a = document.createElement('a');
+      a.className = 'constellation-card';
+      a.href = item.url;
+      a.target = '_blank';
+
+      const star = document.createElement('span');
+      star.className = 'card-star';
+      star.textContent = item.star;
+
+      const info = document.createElement('div');
+      info.className = 'card-info';
+
+      const name = document.createElement('span');
+      name.className = 'card-name';
+      name.textContent = item.name;
+
+      const desc = document.createElement('span');
+      desc.className = 'card-desc';
+      desc.textContent = item.desc;
+
+      info.appendChild(name);
+      info.appendChild(desc);
+      a.appendChild(star);
+      a.appendChild(info);
+      constellationGrid.appendChild(a);
+    });
   }
 
   override disconnectedCallback() {

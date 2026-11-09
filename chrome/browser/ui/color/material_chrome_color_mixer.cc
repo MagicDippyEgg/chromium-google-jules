@@ -540,7 +540,10 @@ void AddMaterialChromeColorMixer(ui::ColorProvider* provider,
       ui::kColorSysOnSurfaceSubtle};
 
   // Toolbar colors.
-  mixer[kColorToolbar] = {ui::kColorSysBase};
+  // Vespera celestial base color overrides
+  mixer[kColorToolbar] = {SkColorSetRGB(0x0c, 0x10, 0x17)};
+  mixer[kColorToolbarButtonIcon] = {SkColorSetRGB(0x00, 0xe5, 0xff)};
+  mixer[kColorToolbarText] = {SkColorSetRGB(0xf0, 0xf6, 0xfc)};
   mixer[kColorToolbarButtonBackgroundHighlightedDefault] = {
       ui::kColorSysStateHoverOnSubtle};
   mixer[kColorToolbarButtonBorder] = {ui::kColorSysOutline};
