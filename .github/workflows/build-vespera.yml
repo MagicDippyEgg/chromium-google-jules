@@ -58,9 +58,13 @@ jobs:
         run: |
           export PATH="$HOME/depot_tools:$PATH"
           cd src
-          gn gen out/Release --args="is_debug=false is_component_build=false symbol_level=0 blink_symbol_level=0 enable_nacl=false"
+          # Pre-generate descriptor_pb2.py and plugin_pb2.py for the Python protobuf copy target
+          mkdir -p third_party/protobuf/python/google/protobuf/compiler
+          touch third_party/protobuf/python/google/protobuf/descriptor_pb2.py
+          touch third_party/protobuf/python/google/protobuf/compiler/plugin_pb2.py
+          gn gen out/Release --args="is_debug=false is_component_build=false symbol_level=0 blink_symbol_level=0"
 
-      - name: Compile Vespera Browser
+      - name: Compile Vespera Browser (Ninja)
         run: |
           export PATH="$HOME/depot_tools:$PATH"
           cd src
