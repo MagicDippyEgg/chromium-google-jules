@@ -697,6 +697,10 @@ export class AppElement extends AppElementBase {
     }
 
     this.initializeContextMenuAnimationState_();
+  }
+
+  override firstUpdated(changedProperties: PropertyValues) {
+    super.firstUpdated(changedProperties);
     this.setupVesperaPortalInteractions_();
   }
 
@@ -710,6 +714,42 @@ export class AppElement extends AppElementBase {
         this.applyVesperaMode_(mode || 'focus');
       });
     });
+
+    let activeEngineUrl = 'https://duckduckgo.com/?q=';
+    const engineMap: Record<string, string> = {
+      'duckduckgo': 'https://duckduckgo.com/?q=',
+      'ecosia': 'https://www.ecosia.org/search?q=',
+      'google': 'https://www.google.com/search?q=',
+      'perplexity': 'https://www.perplexity.ai/search?q='
+    };
+
+    const engineChips = this.shadowRoot?.querySelectorAll('.engine-hud-chip');
+    engineChips?.forEach(chip => {
+      chip.addEventListener('click', () => {
+        engineChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const engine = chip.getAttribute('data-engine') || 'duckduckgo';
+        if (engineMap[engine]) {
+          activeEngineUrl = engineMap[engine];
+        }
+      });
+    });
+
+    const realbox = this.shadowRoot?.querySelector('ntp-realbox');
+    if (realbox) {
+      realbox.addEventListener('keydown', (e: Event) => {
+        const keyEvent = e as KeyboardEvent;
+        if (keyEvent.key === 'Enter') {
+          const input = realbox.shadowRoot?.querySelector('input');
+          const query = input?.value?.trim();
+          if (query && !activeEngineUrl.includes('google.com')) {
+            keyEvent.preventDefault();
+            keyEvent.stopPropagation();
+            window.location.assign(activeEngineUrl + encodeURIComponent(query));
+          }
+        }
+      }, true);
+    }
 
 
     const zenBtn = this.shadowRoot?.querySelector('#vesperaZenBtn');
