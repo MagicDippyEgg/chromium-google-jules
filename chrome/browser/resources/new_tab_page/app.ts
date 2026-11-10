@@ -700,8 +700,6 @@ export class AppElement extends AppElementBase {
     this.setupVesperaPortalInteractions_();
   }
 
-  private selectedEngineUrl_: string = 'https://duckduckgo.com/?q=';
-
   private setupVesperaPortalInteractions_() {
     const modeTabs = this.shadowRoot?.querySelectorAll('.vespera-mode-tab');
     modeTabs?.forEach(tab => {
@@ -713,38 +711,6 @@ export class AppElement extends AppElementBase {
       });
     });
 
-    const engineChips = this.shadowRoot?.querySelectorAll('.engine-hud-chip');
-    const engineMap: Record<string, string> = {
-      'duckduckgo': 'https://duckduckgo.com/?q=',
-      'ecosia': 'https://www.ecosia.org/search?q=',
-      'google': 'https://www.google.com/search?q=',
-      'perplexity': 'https://www.perplexity.ai/search?q='
-    };
-    engineChips?.forEach(chip => {
-      chip.addEventListener('click', () => {
-        engineChips.forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        const engine = chip.getAttribute('data-engine') || 'duckduckgo';
-        if (engineMap[engine]) {
-          this.selectedEngineUrl_ = engineMap[engine];
-        }
-      });
-    });
-
-    const realbox = this.shadowRoot?.querySelector('ntp-realbox');
-    if (realbox) {
-      realbox.addEventListener('keydown', (e: Event) => {
-        const keyEvent = e as KeyboardEvent;
-        if (keyEvent.key === 'Enter') {
-          const input = realbox.shadowRoot?.querySelector('input');
-          if (input && input.value.trim() && !this.selectedEngineUrl_.includes('google.com')) {
-            keyEvent.preventDefault();
-            keyEvent.stopPropagation();
-            window.location.href = this.selectedEngineUrl_ + encodeURIComponent(input.value.trim());
-          }
-        }
-      }, true);
-    }
 
     const zenBtn = this.shadowRoot?.querySelector('#vesperaZenBtn');
     if (zenBtn) {

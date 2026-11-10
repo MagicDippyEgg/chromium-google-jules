@@ -1,0 +1,86 @@
+name: build-vespera
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-vespera:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Checkout Vespera Source
+        uses: actions/checkout@v4
+        with:
+          path: src
+
+      - name: Free Disk Space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/powershell /opt/hostedtoolcache
+          sudo docker system prune -af || true
+          df -h
+
+      - name: Set up Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential clang lld generate-ninja ninja-build python3 python3-pkg-resources \
+            bison gperf pkg-config libglib2.0-dev libnss3-dev libatk1.0-dev \
+            libatk-bridge2.0-dev libcups2-dev libdrm-dev libxkbcommon-dev \
+            libxcomposite-dev libxdamage-dev libxrandr-dev libgbm-dev \
+            libasound2-dev libpango1.0-dev libpulse-dev git curl brotli
+
+      - name: Install depot_tools
+        run: |
+          git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git $HOME/depot_tools
+          echo "$HOME/depot_tools" >> $GITHUB_PATH
+
+      - name: Configure gclient & Sync Dependencies
+        run: |
+          export PATH="$HOME/depot_tools:$PATH"
+          cat << 'GCLIENT' > .gclient
+          solutions = [
+            {
+              "name": "src",
+              "url": "https://github.com/${{ github.repository }}.git",
+              "deps_file": "DEPS",
+              "managed": False,
+              "custom_deps": {},
+            },
+          ]
+          GCLIENT
+          gclient sync --no-history --shallow
+
+      - name: Generate Build Files (GN)
+        run: |
+          export PATH="$HOME/depot_tools:$PATH"
+          cd src
+          gn gen out/Release --args="is_debug=false is_component_build=false symbol_level=0 blink_symbol_level=0 enable_nacl=false use_custom_libcxx=false"
+
+      - name: Compile Vespera Browser
+        run: |
+          export PATH="$HOME/depot_tools:$PATH"
+          cd src
+          ninja -C out/Release chrome
+
+      - name: Package Vespera Browser Distribution
+        run: |
+          cd src
+          mkdir -p package/vespera
+          cp -r out/Release/chrome \
+                out/Release/*.pak \
+                out/Release/*.bin \
+                out/Release/icudtl.dat \
+                out/Release/locales \
+                package/vespera/
+          tar -czvf vespera-linux-x64.tar.gz -C package vespera
+
+      - name: Upload Vespera Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vespera-linux-x64
+          path: src/vespera-linux-x64.tar.gz
+          retention-days: 14

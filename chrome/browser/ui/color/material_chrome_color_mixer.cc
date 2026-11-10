@@ -544,6 +544,10 @@ void AddMaterialChromeColorMixer(ui::ColorProvider* provider,
   mixer[kColorToolbar] = {SkColorSetRGB(0x0c, 0x10, 0x17)};
   mixer[kColorToolbarButtonIcon] = {SkColorSetRGB(0x00, 0xe5, 0xff)};
   mixer[kColorToolbarText] = {SkColorSetRGB(0xf0, 0xf6, 0xfc)};
+  mixer[kColorSettingsWebuiPageBackground] = {SkColorSetRGB(0x0a, 0x0e, 0x17)};
+  mixer[kColorSettingsTitleText] = {SkColorSetRGB(0xf0, 0xf6, 0xfc)};
+  mixer[kColorSettingsSearchFieldBackground] = {SkColorSetRGB(0x16, 0x1b, 0x22)};
+  mixer[kColorSettingsColumnedSectionBackground] = {SkColorSetRGB(0x13, 0x19, 0x24)};
   mixer[kColorToolbarButtonBackgroundHighlightedDefault] = {
       ui::kColorSysStateHoverOnSubtle};
   mixer[kColorToolbarButtonBorder] = {ui::kColorSysOutline};
