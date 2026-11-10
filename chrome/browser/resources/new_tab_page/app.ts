@@ -699,6 +699,157 @@ export class AppElement extends AppElementBase {
     this.initializeContextMenuAnimationState_();
   }
 
+  override firstUpdated(changedProperties: PropertyValues) {
+    super.firstUpdated(changedProperties);
+    this.setupVesperaPortalInteractions_();
+  }
+
+  private setupVesperaPortalInteractions_() {
+    const modeTabs = this.shadowRoot?.querySelectorAll('.vespera-mode-tab');
+    modeTabs?.forEach(tab => {
+      tab.addEventListener('click', () => {
+        modeTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const mode = tab.getAttribute('data-mode');
+        this.applyVesperaMode_(mode || 'focus');
+      });
+    });
+
+    let activeEngineUrl = 'https://duckduckgo.com/?q=';
+    const engineMap: Record<string, string> = {
+      'duckduckgo': 'https://duckduckgo.com/?q=',
+      'ecosia': 'https://www.ecosia.org/search?q=',
+      'google': 'https://www.google.com/search?q=',
+      'perplexity': 'https://www.perplexity.ai/search?q='
+    };
+
+    const engineChips = this.shadowRoot?.querySelectorAll('.engine-hud-chip');
+    engineChips?.forEach(chip => {
+      chip.addEventListener('click', () => {
+        engineChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const engine = chip.getAttribute('data-engine') || 'duckduckgo';
+        if (engineMap[engine]) {
+          activeEngineUrl = engineMap[engine];
+        }
+      });
+    });
+
+    const realbox = this.shadowRoot?.querySelector('ntp-realbox');
+    if (realbox) {
+      realbox.addEventListener('keydown', (e: Event) => {
+        const keyEvent = e as KeyboardEvent;
+        if (keyEvent.key === 'Enter') {
+          const input = realbox.shadowRoot?.querySelector('input');
+          const query = input?.value?.trim();
+          if (query && !activeEngineUrl.includes('google.com')) {
+            keyEvent.preventDefault();
+            keyEvent.stopPropagation();
+            window.location.assign(activeEngineUrl + encodeURIComponent(query));
+          }
+        }
+      }, true);
+    }
+
+
+    const zenBtn = this.shadowRoot?.querySelector('#vesperaZenBtn');
+    if (zenBtn) {
+      let zenActive = false;
+      zenBtn.addEventListener('click', () => {
+        zenActive = !zenActive;
+        const label = zenBtn.querySelector('.vespera-zen-label');
+        const dot = zenBtn.querySelector('.vespera-zen-dot') as HTMLElement;
+        if (label) {
+          label.textContent = zenActive ? 'Zen: Active' : 'Zen: Off';
+        }
+        if (dot) {
+          dot.style.background = zenActive ? '#00e5ff' : '#484f58';
+          dot.style.boxShadow = zenActive ? '0 0 8px #00e5ff' : 'none';
+        }
+        const portal = this.shadowRoot?.querySelector('.vespera-portal-container') as HTMLElement;
+        const rhsContent = this.shadowRoot?.querySelector('#rhsContent') as HTMLElement;
+        if (portal) {
+          portal.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+          portal.style.opacity = zenActive ? '0.1' : '1';
+        }
+        if (rhsContent) {
+          const modules = rhsContent.querySelectorAll('ntp-modules, #customizeButton, #microsoftAuth');
+          modules.forEach((mod) => {
+            (mod as HTMLElement).style.display = zenActive ? 'none' : '';
+          });
+        }
+      });
+    }
+  }
+
+  private applyVesperaMode_(mode: string) {
+    const constellationGrid = this.shadowRoot?.querySelector('.constellation-grid');
+    if (!constellationGrid) return;
+
+    interface LinkItem {
+      star: string;
+      name: string;
+      desc: string;
+      url: string;
+    }
+
+    let items: LinkItem[] = [];
+    if (mode === 'research') {
+      items = [
+        {star: '✶', name: 'arXiv', desc: 'AI & CS Preprints', url: 'https://arxiv.org'},
+        {star: '✧', name: 'Google Scholar', desc: 'Academic Papers', url: 'https://scholar.google.com'},
+        {star: '✪', name: 'Wikipedia', desc: 'Encyclopedia', url: 'https://en.wikipedia.org'},
+        {star: '✦', name: 'GitHub', desc: 'Open Source', url: 'https://github.com'}
+      ];
+    } else if (mode === 'creative') {
+      items = [
+        {star: '✦', name: 'Dribbble', desc: 'Visual Inspiration', url: 'https://dribbble.com'},
+        {star: '✧', name: 'Unsplash', desc: 'High-Res Imagery', url: 'https://unsplash.com'},
+        {star: '✶', name: 'CodePen', desc: 'Creative Coding', url: 'https://codepen.io'},
+        {star: '✪', name: 'Figma', desc: 'Interface Design', url: 'https://figma.com'}
+      ];
+    } else {
+      items = [
+        {star: '✦', name: 'Hacker News', desc: 'Tech & Engineering', url: 'https://news.ycombinator.com'},
+        {star: '✧', name: 'GitHub', desc: 'Code & Repositories', url: 'https://github.com'},
+        {star: '✶', name: 'arXiv', desc: 'Scientific Preprints', url: 'https://arxiv.org'},
+        {star: '✪', name: 'Wikipedia', desc: 'Universal Knowledge', url: 'https://en.wikipedia.org'}
+      ];
+    }
+
+    while (constellationGrid.firstChild) {
+      constellationGrid.removeChild(constellationGrid.firstChild);
+    }
+
+    items.forEach(item => {
+      const a = document.createElement('a');
+      a.className = 'constellation-card';
+      a.href = item.url;
+      a.target = '_blank';
+
+      const star = document.createElement('span');
+      star.className = 'card-star';
+      star.textContent = item.star;
+
+      const info = document.createElement('div');
+      info.className = 'card-info';
+
+      const name = document.createElement('span');
+      name.className = 'card-name';
+      name.textContent = item.name;
+
+      const desc = document.createElement('span');
+      desc.className = 'card-desc';
+      desc.textContent = item.desc;
+
+      info.appendChild(name);
+      info.appendChild(desc);
+      a.appendChild(star);
+      a.appendChild(info);
+      constellationGrid.appendChild(a);
+    });
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback();
     realboxCanShowSecondarySideMediaQueryList.removeEventListener(
